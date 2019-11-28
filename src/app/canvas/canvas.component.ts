@@ -23,7 +23,8 @@ export class CanvasComponent implements OnInit {
     yValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.CANVAS_HEIGHT)]],
     xValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.CANVAS_WIDTH)]],
     fontSize: ['', [Validators.pattern(NUMBERS_REGEX)]],
-    fontFamily: [this.fontList[1], [Validators.required]]
+    fontColor: ['', []],
+    fontFamily: [this.fontList[0], [Validators.required]]
   });
 
   constructor(private fb: FormBuilder) { }
@@ -32,6 +33,7 @@ export class CanvasComponent implements OnInit {
   get yValue() { return this.canvasForm.get('yValue'); }
   get xValue() { return this.canvasForm.get('xValue'); }
   get fontSize() { return this.canvasForm.get('fontSize'); }
+  get fontColor() { return this.canvasForm.get('fontColor'); }
   get fontFamily() { return this.canvasForm.get('fontFamily'); }
 
   ngOnInit() {
@@ -50,6 +52,7 @@ export class CanvasComponent implements OnInit {
       this.ctx.font = `${this.fontSize.value || 35}px ${this.fontFamily.value}`;
       const x = this.xValue.value || this.CANVAS_WIDTH / 2;
       const y = this.yValue.value || this.CANVAS_HEIGHT / 2;
+      this.ctx.fillStyle = this.fontColor.value;
       this.ctx.fillText(this.text.value, x, y);
     }
   }
