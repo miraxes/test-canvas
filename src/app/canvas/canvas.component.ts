@@ -14,6 +14,7 @@ export class CanvasComponent implements OnInit {
   ctx: CanvasRenderingContext2D;
   readonly CANVAS_HEIGHT = 700;
   readonly CANVAS_WIDTH = 500;
+
   @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
   fontList = ['Calistoga', 'Tangerine', 'Bebas Neue', 'Acme', 'Permanent Marker'];
   submitAttempt: boolean;
