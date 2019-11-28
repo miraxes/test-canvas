@@ -1,0 +1,78 @@
+<div class="container">
+    <div class="row">
+        <form [formGroup]="canvasForm"  (ngSubmit)="draw()" class="needs-validation">
+            <div class="form-row mb-3">
+                <div class="form-group col-md-3 col-xs-6">
+                    <label for="text">Text itself</label>
+                    <input type="text" class="form-control" [class.is-invalid]="text.invalid && submitAttempt" id="text" formControlName="text">
+                    <div *ngIf="text.invalid && submitAttempt" class="invalid-feedback">
+                        <div *ngIf="text.errors.required">
+                            Text is required
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-3 col-xs-6">
+                    <label for="fontFamily">Font Family</label>
+                    <select class="custom-select mb-3" id="fontFamily" formControlName="fontFamily">
+                        <option [value]="font" *ngFor="let font of fontList">{{font}}</option>
+                    </select>
+                </div>
+
+                <div class="form-group col-md-2 col-xs-4">
+                    <label for="xValue">X coordinate</label>
+                    <input type="text" class="form-control" [class.is-invalid]="xValue.invalid && submitAttempt" id="xValue" formControlName="xValue">
+                    <div *ngIf="xValue.invalid && submitAttempt" class="invalid-feedback">
+                        <div *ngIf="xValue.errors.pattern">
+                            Only numbers allowed
+                        </div>
+                        <div *ngIf="xValue.errors.max">
+                            Coordinate out of bounds max is {{CANVAS_WIDTH}}
+                        </div>
+                    </div>
+                </div>
+
+
+                <div class="form-group col-md-2 col-xs-4">
+                    <label for="yValue">Y coordinate</label>
+                    <input type="text" class="form-control" [class.is-invalid]="yValue.invalid && submitAttempt" id="yValue" formControlName="yValue">
+                    <div *ngIf="yValue.invalid && submitAttempt" class="invalid-feedback">
+                        <div *ngIf="yValue.errors.pattern">
+                            Only numbers allowed
+                        </div>
+                        <div *ngIf="yValue.errors.max">
+                            Coordinate out of bounds max is {{CANVAS_HEIGHT}}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group col-md-2 col-xs-4">
+                    <label for="fontSize">Font size</label>
+                    <input type="text" class="form-control" id="fontSize" [class.is-invalid]="fontSize.invalid && submitAttempt"  formControlName="fontSize">
+                    <div *ngIf="fontSize.invalid && submitAttempt" class="invalid-feedback">
+                        <div *ngIf="fontSize.errors.pattern">
+                            Only numbers allowed
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            <button type="submit" [disabled]="submitAttempt && !canvasForm.valid" class="btn btn-primary btn-block mb-5">
+                Generate
+            </button>
+        </form>
+
+    </div>
+    <div class="row text-center mb-5">
+        <canvas #canvas width="500" height="700"></canvas>
+    </div>
+
+    <div class="text-center mb-3">
+        <a [href]="imageData" class="btn btn-secondary btn-lg" download="canvas.png">
+            Download as Image
+        </a>
+    </div>
+</div>
+
+
+
