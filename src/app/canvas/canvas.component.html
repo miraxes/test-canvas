@@ -63,7 +63,8 @@
 
                     <div class="form-group col-md-12">
                         <label for="fontColor">Font Color</label>
-                        <input type="fontColor" class="form-control" [(colorPicker)]="fontColor.value" [style.background]="fontColor.value" id="fontColor" formControlName="fontColor">
+                        <input type="fontColor" class="form-control" [colorPicker]="fontColor.value" (colorPickerChange)="fontColor.setValue($event)"
+                            [style.background]="fontColor.value" id="fontColor" formControlName="fontColor">
                     </div>
 
                 </div>
