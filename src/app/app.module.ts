@@ -9,6 +9,9 @@ import { ButtonsModule } from 'ngx-bootstrap/buttons';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { ColorPickerModule } from 'ngx-color-picker';
+import { StoreModule } from '@ngrx/store';
+import { canvasReducer, metaReducers } from './store/reducers/canvas.reducer';
+import { reducers } from './store/reducers';
 
 @NgModule({
   declarations: [
@@ -22,7 +25,14 @@ import { ColorPickerModule } from 'ngx-color-picker';
     ButtonsModule.forRoot(),
     AppRoutingModule,
     BrowserAnimationsModule,
-    ColorPickerModule
+    ColorPickerModule,
+    StoreModule.forRoot(reducers, {
+      metaReducers,
+      runtimeChecks: {
+        strictStateImmutability: true,
+        strictActionImmutability: true
+      }
+    })
   ],
   providers: [],
   bootstrap: [AppComponent]

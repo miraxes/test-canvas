@@ -1,89 +1,146 @@
 <div class="container">
-    <h1>Card Canvas Generator</h1>
-    <div class="row">
-        <div class="col-xl-6 col-lg-12 mb-5">
-            <canvas #canvas width="500" height="700"></canvas>
-         </div>
-        <div class="col-xl-4 col-lg-12 col-sm-12 mb-5">
-            <form [formGroup]="canvasForm"  (ngSubmit)="draw()" class="needs-validation">
-                <div class="form-row mb-3">
-                    <div class="form-group col-md-6 col-xs-6">
-                        <label for="text">Text itself *</label>
-                        <input type="text" class="form-control" [class.is-invalid]="text.invalid && submitAttempt" id="text" formControlName="text">
-                        <div *ngIf="text.invalid && submitAttempt" class="invalid-feedback">
-                            <div *ngIf="text.errors.required">
-                                Text is required
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group col-md-6 col-xs-6">
-                        <label for="fontFamily">Font Family</label>
-                        <select class="custom-select mb-3" id="fontFamily" formControlName="fontFamily">
-                            <option [value]="font" *ngFor="let font of fontList">{{font}}</option>
-                        </select>
-                    </div>
-
-                    <div class="form-group col-md-4 col-xs-4">
-                        <label for="xValue">X coordinate</label>
-                        <input type="number" class="form-control" [class.is-invalid]="xValue.invalid && submitAttempt" id="xValue" formControlName="xValue">
-                        <div *ngIf="xValue.invalid && submitAttempt" class="invalid-feedback">
-                            <div *ngIf="xValue.errors.pattern">
-                                Only numbers allowed
-                            </div>
-                            <div *ngIf="xValue.errors.max">
-                                Coordinate out of bounds max is {{CANVAS_WIDTH}}
-                            </div>
-                        </div>
-                    </div>
-
-
-                    <div class="form-group col-md-4 col-xs-4">
-                        <label for="yValue">Y coordinate</label>
-                        <input type="number" class="form-control" [class.is-invalid]="yValue.invalid && submitAttempt" id="yValue" formControlName="yValue">
-                        <div *ngIf="yValue.invalid && submitAttempt" class="invalid-feedback">
-                            <div *ngIf="yValue.errors.pattern">
-                                Only numbers allowed
-                            </div>
-                            <div *ngIf="yValue.errors.max">
-                                Coordinate out of bounds max is {{CANVAS_HEIGHT}}
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group col-md-4 col-xs-4">
-                        <label for="fontSize">Font size (px)</label>
-                        <input type="number" class="form-control" id="fontSize" [class.is-invalid]="fontSize.invalid && submitAttempt"  formControlName="fontSize">
-                        <div *ngIf="fontSize.invalid && submitAttempt" class="invalid-feedback">
-                            <div *ngIf="fontSize.errors.pattern">
-                                Only numbers allowed
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="form-group col-md-12">
-                        <label for="fontColor">Font Color</label>
-                        <input type="fontColor" class="form-control" [colorPicker]="fontColor.value" (colorPickerChange)="fontColor.setValue($event)"
-                            [style.background]="fontColor.value" id="fontColor" formControlName="fontColor">
-                    </div>
-
-                </div>
-                <button type="submit" [disabled]="submitAttempt && !canvasForm.valid" class="btn btn-primary btn-block mb-5">
-                    Generate
-                </button>
-            </form>
-            <div class="text-right">
-                by Miro
+  <h1>Card Canvas Generator</h1>
+  <div class="row">
+    <div class="col-xl-6 col-lg-12 mb-5">
+      <canvas #canvas width="500" height="700"></canvas>
+    </div>
+    <div class="col-xl-4 col-lg-12 col-sm-12 mb-5">
+      <form
+        [formGroup]="canvasForm"
+        (ngSubmit)="draw()"
+        class="needs-validation"
+      >
+        <div class="form-row mb-3">
+          <div class="form-group col-md-6 col-xs-6">
+            <label for="text">Text itself *</label>
+            <input
+              type="text"
+              class="form-control"
+              [class.is-invalid]="text.invalid && submitAttempt"
+              id="text"
+              formControlName="text"
+            />
+            <div *ngIf="text.invalid && submitAttempt" class="invalid-feedback">
+              <div *ngIf="text.errors.required">
+                Text is required
+              </div>
+              <div *ngIf="text.errors.maxlength">
+                Max character count is {{maxTextLength}}.
+              </div>
             </div>
+          </div>
+
+          <div class="form-group col-md-6 col-xs-6">
+            <label for="fontFamily">Font Family</label>
+            <select
+              class="custom-select mb-3"
+              id="fontFamily"
+              formControlName="fontFamily"
+            >
+              <option [value]="font" *ngFor="let font of fontsList">{{
+                font
+              }}</option>
+            </select>
+          </div>
+
+          <div class="form-group col-md-4 col-xs-4">
+            <label for="xValue">X coordinate</label>
+            <input
+              type="number"
+              class="form-control"
+              [class.is-invalid]="xValue.invalid && submitAttempt"
+              id="xValue"
+              formControlName="xValue"
+            />
+            <div
+              *ngIf="xValue.invalid && submitAttempt"
+              class="invalid-feedback"
+            >
+              <div *ngIf="xValue.errors.pattern">
+                Only numbers allowed
+              </div>
+              <div *ngIf="xValue.errors.max">
+                Coordinate out of bounds max is {{ canvasWidth }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group col-md-4 col-xs-4">
+            <label for="yValue">Y coordinate</label>
+            <input
+              type="number"
+              class="form-control"
+              [class.is-invalid]="yValue.invalid && submitAttempt"
+              id="yValue"
+              formControlName="yValue"
+            />
+            <div
+              *ngIf="yValue.invalid && submitAttempt"
+              class="invalid-feedback"
+            >
+              <div *ngIf="yValue.errors.pattern">
+                Only numbers allowed
+              </div>
+              <div *ngIf="yValue.errors.max">
+                Coordinate out of bounds max is {{ canvasHeight }}
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group col-md-4 col-xs-4">
+            <label for="fontSize">Font size (px)</label>
+            <input
+              type="number"
+              class="form-control"
+              id="fontSize"
+              [class.is-invalid]="fontSize.invalid && submitAttempt"
+              formControlName="fontSize"
+            />
+            <div
+              *ngIf="fontSize.invalid && submitAttempt"
+              class="invalid-feedback"
+            >
+              <div *ngIf="fontSize.errors.pattern">
+                Only numbers allowed
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group col-md-12">
+            <label for="fontColor">Font Color</label>
+            <input
+              type="fontColor"
+              class="form-control"
+              [colorPicker]="fontColor.value"
+              (colorPickerChange)="fontColor.setValue($event)"
+              [style.background]="fontColor.value"
+              id="fontColor"
+              formControlName="fontColor"
+            />
+          </div>
         </div>
+        <a [ngClass]="{disabled: isUndoDisabled}" class="btn btn-warning btn-block mb-5" (click)="undo()">Undo</a>
+        <button
+          type="submit"
+          [disabled]="submitAttempt && !canvasForm.valid"
+          class="btn btn-primary btn-block mb-5"
+        >
+          Generate
+        </button>
+      </form>
+      <div class="text-right">
+        by Miro
+      </div>
     </div>
+  </div>
 
-    <div class="text-center mb-3">
-        <a [href]="imageData" class="btn btn-secondary btn-lg" download="canvas.png">
-            Download as Image
-        </a>
-    </div>
+  <div class="text-center mb-3">
+    <a
+      [href]="imageData"
+      class="btn btn-secondary btn-lg"
+      download="canvas.png"
+    >
+      Download as Image
+    </a>
+  </div>
 </div>
-
-
-

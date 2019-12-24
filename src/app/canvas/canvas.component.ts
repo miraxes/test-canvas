@@ -1,68 +1,126 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, Validators, AbstractControl, FormGroup } from '@angular/forms';
 import * as WebFont from 'webfontloader';
+import { TextLayer } from '../models/canvas';
+import { CanvasFacade } from '../service/canvas.facade';
 
 const NUMBERS_REGEX = /^[0-9]+(\.?[0-9]+)?$/;
+const FONTS_LIST = ['Calistoga', 'Tangerine', 'Bebas Neue', 'Acme', 'Permanent Marker'];
+const CANVAS_HEIGHT = 700;
+const CANVAS_WIDTH = 500;
+const MAX_TEXT_LENGTH = 50;
 
 @Component({
-  selector: 'app-canvas',
   templateUrl: './canvas.component.html',
   styleUrls: ['./canvas.component.scss']
 })
 export class CanvasComponent implements OnInit {
+  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
+
+  canvasForm: FormGroup;
 
   ctx: CanvasRenderingContext2D;
-  readonly CANVAS_HEIGHT = 700;
-  readonly CANVAS_WIDTH = 500;
 
-  @ViewChild('canvas', { static: true }) canvas: ElementRef<HTMLCanvasElement>;
-  fontList = ['Calistoga', 'Tangerine', 'Bebas Neue', 'Acme', 'Permanent Marker'];
-  submitAttempt: boolean;
-  canvasForm = this.fb.group({
-    text: ['', Validators.required],
-    yValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.CANVAS_HEIGHT)]],
-    xValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.CANVAS_WIDTH)]],
-    fontSize: ['', [Validators.pattern(NUMBERS_REGEX)]],
-    fontColor: ['', []],
-    fontFamily: [this.fontList[0], [Validators.required]]
-  });
+  canvasHeight = CANVAS_HEIGHT;
+  canvasWidth = CANVAS_WIDTH;
+  maxTextLength = MAX_TEXT_LENGTH;
+  fontsList = FONTS_LIST;
 
-  constructor(private fb: FormBuilder) { }
+  submitAttempt = false;
 
-  get text() { return this.canvasForm.get('text'); }
-  get yValue() { return this.canvasForm.get('yValue'); }
-  get xValue() { return this.canvasForm.get('xValue'); }
-  get fontSize() { return this.canvasForm.get('fontSize'); }
-  get fontColor() { return this.canvasForm.get('fontColor'); }
-  get fontFamily() { return this.canvasForm.get('fontFamily'); }
+  constructor(
+    private fb: FormBuilder,
+    private canvasFacade: CanvasFacade
+  ) { }
+
+  get text(): AbstractControl { return this.canvasForm.get('text'); }
+  get yValue(): AbstractControl { return this.canvasForm.get('yValue'); }
+  get xValue(): AbstractControl { return this.canvasForm.get('xValue'); }
+  get fontSize(): AbstractControl { return this.canvasForm.get('fontSize'); }
+  get fontColor(): AbstractControl { return this.canvasForm.get('fontColor'); }
+  get fontFamily(): AbstractControl { return this.canvasForm.get('fontFamily'); }
+
+  get imageData(): string {
+    return this.canvas.nativeElement.toDataURL();
+  }
+
+  get isUndoDisabled(): boolean {
+    return !this.canvasFacade.getAllTextLayers().length;
+  }
 
   ngOnInit() {
-    WebFont.load({
-      google: {
-        families: this.fontList
-      }
-    });
-    this.ctx = this.canvas.nativeElement.getContext('2d');
+    this.initForm();
+    this.loadGoogleFonts();
+    this.initCanvasContext();
+  }
+
+  undo() {
+    this.canvasFacade.removeLastTextLayer();
+    this.clearCanvas();
+    this.drawStoredText();
   }
 
   draw() {
     this.submitAttempt = true;
-    if (this.canvasForm.valid) {
-      this.clearCanvas();
-      this.ctx.font = `${this.fontSize.value || 35}px ${this.fontFamily.value}`;
-      const x = this.xValue.value || this.CANVAS_WIDTH / 2;
-      const y = this.yValue.value || this.CANVAS_HEIGHT / 2;
-      this.ctx.fillStyle = this.fontColor.value;
-      this.ctx.fillText(this.text.value, x, y);
+    if (this.canvasForm.invalid) {
+      return;
     }
+    const tmpText = new TextLayer();
+    tmpText.fontSize = this.fontSize.value || 35;
+    tmpText.yValue = this.yValue.value || this.canvasHeight / 2;
+    tmpText.xValue = this.xValue.value || this.canvasWidth / 2;
+    tmpText.fontColor = this.fontColor.value;
+    tmpText.text = this.text.value;
+    tmpText.fontFamily = this.fontFamily.value;
+    this.canvasFacade.addTextLayer(tmpText);
+    this.addTextLayer(tmpText);
+    this.resetForm();
   }
 
-  get imageData() {
-    return this.canvas.nativeElement.toDataURL();
+  private drawStoredText() {
+    this.canvasFacade.getAllTextLayers().forEach(r => {
+      this.addTextLayer(r);
+    });
   }
 
-  clearCanvas() {
+  private resetForm() {
+    this.canvasForm.reset();
+    this.submitAttempt = false;
+    this.canvasForm.patchValue({fontFamily: FONTS_LIST[0]});
+  }
+
+  private clearCanvas() {
     this.ctx.clearRect(0, 0, this.canvas.nativeElement.width, this.canvas.nativeElement.height);
   }
 
+  private addTextLayer(layer: TextLayer) {
+    this.ctx.font = `${layer.fontSize}px ${layer.fontFamily}`;
+    const x = layer.xValue;
+    const y = layer.yValue;
+    this.ctx.fillStyle = layer.fontColor;
+    this.ctx.fillText(layer.text, x, y);
+  }
+
+  private initCanvasContext() {
+    this.ctx = this.canvas.nativeElement.getContext('2d');
+  }
+
+  private loadGoogleFonts() {
+    WebFont.load({
+      google: {
+        families: FONTS_LIST
+      }
+    });
+  }
+
+  private initForm() {
+    this.canvasForm = this.fb.group({
+      text: ['', [Validators.required, Validators.maxLength(MAX_TEXT_LENGTH)]],
+      yValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.canvasHeight)]],
+      xValue: ['', [Validators.pattern(NUMBERS_REGEX), Validators.max(this.canvasWidth)]],
+      fontSize: ['', Validators.pattern(NUMBERS_REGEX)],
+      fontColor: [''],
+      fontFamily: [FONTS_LIST[0], Validators.required]
+    });
+  }
 }
